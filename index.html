@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>JSON Input Page</title>
+    <style>
+        .container {
+
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .data-container {
+            max-width: 100%;
+            flex: 1;
+            margin-right: 10px;
+            color: rgb(204, 204, 204);
+            background-color: rgb(24, 24, 24)
+        }
+
+        .button-container {
+            white-space: nowrap;
+            display: flex;
+            /* margin-left: 45%; */
+            margin-top: 10px;
+            justify-content: center;
+        }
+
+        .button-container button {
+            display: inline-block;
+            margin-right: 5px;
+            width: 130px;
+            height: 40px;
+            border-radius: 15px;
+            border-color: black;
+            border-width: 3px;
+        }
+
+        .data {
+            max-width: 100%;
+            height: 500px;
+            border: 1px solid #ccc;
+            padding: 5px;
+            overflow-y: scroll;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+
+<body style="background-color: rgb(57, 59, 59);">
+    <div class="container">
+        <div class="data-container">
+            <div id="jsonData" class="data"></div>
+        </div>
+    </div>
+    <div class="button-container">
+        <button data="B-PER" style="background-color: red;">B-PER</button>
+        <button data="B-LOC" style="background-color: cyan;">B-LOC</button>
+        <button data="B-ORG" style="background-color: brown;">B-ORG</button>
+        <button data="O" style="background-color: fuchsia;">O</button>
+
+    </div>
+    <div class="button-container">
+        <button data="I-PER" style="background-color: green;">I-PER</button>
+        <button data="I-LOC" style="background-color: yellow;">I-LOC</button><br style="display: flex;" />
+        <button data="I-ORG" style="background-color: orange;">I-ORG</button><br />
+        <button data="MISC" style="background-color: gray;">MISC</button>
+    </div>
+    <div style="justify-content: center; display: flex; margin-top: 80px;">
+        <input type="file" id="jsonFileInput" accept=".json">
+        <button id="update">download</button>
+    </div>
+
+    <script>
+        var data = {};
+        window.onload = function () {
+            $("#jsonFileInput").val('');
+        };
+        $(document).ready(function () {
+            $('#jsonFileInput').on('change', function (event) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+
+                reader.onload = function (e) {
+                    const jsonContent = e.target.result;
+
+                    try {
+                        data = JSON.parse(jsonContent);
+                        const inputs = data;
+                        // console.table(inputs);
+                        let ar = '';
+                        for (let [index, value] of inputs.entries()) {
+                            ar += `<div data="${index}"><span style="user-select: none;color:grey;">${index}: &nbsp;</span><span  style="user-select: none;color:rgb(0,255,100);">${value['Flag']}</span>&nbsp;<span style="color:orange;user-select: none;">${value['post_id']}</span><span style="user-select: none;"> ${JSON.stringify(value['entities'])}</span> <hr> ${value['input']}<span style="user-select: none;white-space:pre;">&nbsp;&nbsp;${value['target']}</span></div><hr>`;
+
+                            console.log(`${value['target']}`);
+                        }
+                        $('#jsonData').html(ar);
+                    } catch (error) {
+                        console.error('Error parsing JSON file:', error);
+                    }
+                };
+
+                reader.readAsText(file);
+            });
+
+            // Add click event listener to color buttons
+            $('.button-container button').click(function () {
+                const selectedText = getSelectedText();
+                const color = $(this).css('background-color');
+                const label = $(this).attr('data');
+                highlightSelectedWord(selectedText, color, label);
+            });
+        });
+
+        function getSelectedText() {
+            return window.getSelection().toString();
+        }
+        function highlightSelectedWord(word, color, label) {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const span = document.createElement('span');
+                span.style.backgroundColor = color;
+                span.style.color = 'rgb(10,10,10)';
+                span.appendChild(document.createTextNode(word));
+                range.deleteContents();
+                range.insertNode(span);
+                selection.removeAllRanges();
+
+                // Find the parent div by traversing up the DOM tree
+                let selectedWordDiv = range.startContainer;
+                while (selectedWordDiv && selectedWordDiv.tagName !== 'DIV') {
+                    selectedWordDiv = selectedWordDiv.parentNode;
+                }
+
+                if (selectedWordDiv && selectedWordDiv.hasAttribute('data')) {
+                    const selectedTargetIndex = selectedWordDiv.getAttribute('data');
+                    let line = selectedWordDiv.textContent;
+                    let par = line.indexOf(':');
+                    line = line.substring(++par).trim();
+                    let arr = line.split(/\'\, /g);
+                    let chind = arr.findIndex(item => item.includes(word));
+                    let tar = JSON.parse(data[selectedTargetIndex]['target'].replace(/'/g, '"'));
+                    tar[chind] = label;
+                    let resultant = JSON.stringify(tar);
+                    data[selectedTargetIndex]['target'] = resultant.replace(/"/g, "'");
+                    console.log(data);
+                }
+            } else {
+                return false;
+            }
+        }
+        $('#update').click(() => {
+            const updatedData = JSON.stringify(data, null, 2);
+            console.log(updatedData);
+            // Convert the string to a Blob
+            var blob = new Blob([updatedData], { type: 'application/json' });
+
+            // Create a temporary URL for the Blob
+            var url = URL.createObjectURL(blob);
+
+            // Create a link element
+            var link = document.createElement('a');
+            link.href = url;
+            link.download = 'data.json';
+
+            // Simulate a click on the link to trigger the download
+            link.click();
+
+            // Clean up by revoking the URL object
+            URL.revokeObjectURL(url);
+        });
+    </script>
+</body>
+
+</html>
