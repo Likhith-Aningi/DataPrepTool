@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>JSON Input Page</title>
+    <title>Data Prep Tool</title>
     <style>
         .container {
 
@@ -90,9 +90,8 @@
                         // console.table(inputs);
                         let ar = '';
                         for (let [index, value] of inputs.entries()) {
-                            ar += `<div data="${index}"><span style="user-select: none;color:grey;">${index}: &nbsp;</span><span  style="user-select: none;color:rgb(0,255,100);">${value['Flag']}</span>&nbsp;<span style="color:orange;user-select: none;">${value['post_id']}</span><span style="user-select: none;"> ${JSON.stringify(value['entities'])}</span> <hr> ${value['input']}<span style="user-select: none;white-space:pre;">&nbsp;&nbsp;${value['target']}</span></div><hr>`;
-
-                            console.log(`${value['target']}`);
+                            ar += `<div id="for${index}" data="${index}"><span style="user-select: none;color:grey;">${index}: &nbsp;</span><span  style="user-select: none;color:rgb(0,255,100);">${value['Flag']}</span>&nbsp;<span style="color:orange;user-select: none;">${value['post_id']}</span><span style="user-select: none;"> ${JSON.stringify(value['entities'])}</span> <hr><span class="ip">${value['input']}</span><span style="user-select: none;white-space:pre;">&nbsp;&nbsp;${value['target']}</span></div><hr>`;
+                            // console.log(`${value['target']}`);
                         }
                         $('#jsonData').html(ar);
                     } catch (error) {
@@ -108,6 +107,7 @@
                 const selectedText = getSelectedText();
                 const color = $(this).css('background-color');
                 const label = $(this).attr('data');
+                // console.log(selectedText, color, label);
                 highlightSelectedWord(selectedText, color, label);
             });
         });
@@ -135,11 +135,21 @@
 
                 if (selectedWordDiv && selectedWordDiv.hasAttribute('data')) {
                     const selectedTargetIndex = selectedWordDiv.getAttribute('data');
-                    let line = selectedWordDiv.textContent;
-                    let par = line.indexOf(':');
-                    line = line.substring(++par).trim();
-                    let arr = line.split(/\'\, /g);
+                    // let line = selectedWordDiv.textContent;
+                    // // console.log("line " + line);
+                    // let par = line.lastIndexOf(':');
+                    // // console.log("ind " + par);
+                    // line = line.substring(++par).trim();
+                    // console.log("line " + line);
+
+                    let divv = $(`#for${selectedTargetIndex} span.ip`).text();
+
+
+
+                    let arr = divv.split(/\'\, /g);
+                    // console.log(arr);
                     let chind = arr.findIndex(item => item.includes(word));
+                    // console.log(chind);
                     let tar = JSON.parse(data[selectedTargetIndex]['target'].replace(/'/g, '"'));
                     tar[chind] = label;
                     let resultant = JSON.stringify(tar);
