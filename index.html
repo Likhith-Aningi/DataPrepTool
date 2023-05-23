@@ -142,10 +142,8 @@
                     // line = line.substring(++par).trim();
                     // console.log("line " + line);
 
-                    let divv = $(`#for${selectedTargetIndex} span.ip`).text();
-
-
-
+                    let divv = $(`#for${selectedTargetIndex} span.ip`).text().replace(/"/g, "'");
+                    console.log(divv);
                     let arr = divv.split(/\'\, /g);
                     // console.log(arr);
                     let chind = arr.findIndex(item => item.includes(word));
