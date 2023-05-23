@@ -1,1 +1,2 @@
-# DataPrepTool1 for NER recognition ; data.json is the sample data
+# DataPrepTool for NER recognition 
+data.json is the sample data
