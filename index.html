@@ -90,7 +90,7 @@
                         // console.table(inputs);
                         let ar = '';
                         for (let [index, value] of inputs.entries()) {
-                            ar += `<div id="for${index}" data="${index}"><span style="user-select: none;color:grey;">${index}: &nbsp;</span><span  style="user-select: none;color:rgb(0,255,100);">${value['Flag']}</span>&nbsp;<span style="color:orange;user-select: none;">${value['post_id']}</span><span style="user-select: none;"> ${JSON.stringify(value['entities'])}</span> <hr><span class="ip">${value['input']}</span><span style="user-select: none;white-space:pre;">&nbsp;&nbsp;${value['target']}</span></div><hr>`;
+                            ar += `<div id="for${index}" data="${index}"><span style="user-select: none;color:grey;">${index}: &nbsp;</span><span class="ip">${value['input']}</span><span style="user-select: none;white-space:pre;">&nbsp;&nbsp;${value['target']}</span></div><hr>`;
                             // console.log(`${value['target']}`);
                         }
                         $('#jsonData').html(ar);
