@@ -5,7 +5,7 @@
     <title>Data Prep Tool</title>
     <style>
         .container {
-
+            overflow-wrap: break-word;
             display: flex;
             align-items: flex-start;
         }
@@ -13,7 +13,7 @@
         .data-container {
             max-width: 100%;
             flex: 1;
-            margin-right: 10px;
+            /* margin-right: 10px; */
             color: rgb(204, 204, 204);
             background-color: rgb(24, 24, 24)
         }
@@ -37,6 +37,7 @@
         }
 
         .data {
+            overflow-wrap: break-word;
             max-width: 100%;
             height: 500px;
             border: 1px solid #ccc;
@@ -90,7 +91,14 @@
                         // console.table(inputs);
                         let ar = '';
                         for (let [index, value] of inputs.entries()) {
-                            ar += `<div id="for${index}" data="${index}"><span style="user-select: none;color:grey;">${index}: &nbsp;</span><span class="ip">${value['input']}</span><span style="user-select: none;white-space:pre;">&nbsp;&nbsp;${value['target']}</span></div><hr>`;
+                            let string = '[';
+                            for ([i, v] of value['input'].entries()) {
+                                string += `'<span wi=${i} style="user-select:all;">${v}</span>'`;
+                                if (i === value['input'].length - 1) string += "]";
+                                else string += ',';
+                            }
+                            // console.log(string);
+                            ar += `<div id="for${index}" data="${index}"><span style="user-select: none;color:grey;">${index}: &nbsp;</span><span class="ip" style="user-select: none;">${string}</span><div><span style="user-select: none;white-space:pre;">&nbsp;&nbsp;${value['target']}</span></div></div><hr>`;
                             // console.log(`${value['target']}`);
                         }
                         $('#jsonData').html(ar);
@@ -119,6 +127,13 @@
             const selection = window.getSelection();
             if (selection.rangeCount > 0) {
                 const range = selection.getRangeAt(0);
+                const container = document.createElement("div");
+                container.appendChild(range.cloneContents());
+                const spanElement = container.querySelector("span[wi]");
+                if (spanElement) {
+                    var wiValue = spanElement.getAttribute("wi");
+                    // console.log("index:", wiValue);
+                }
                 const span = document.createElement('span');
                 span.style.backgroundColor = color;
                 span.style.color = 'rgb(10,10,10)';
@@ -135,19 +150,12 @@
 
                 if (selectedWordDiv && selectedWordDiv.hasAttribute('data')) {
                     const selectedTargetIndex = selectedWordDiv.getAttribute('data');
-                    // let line = selectedWordDiv.textContent;
-                    // // console.log("line " + line);
-                    // let par = line.lastIndexOf(':');
-                    // // console.log("ind " + par);
-                    // line = line.substring(++par).trim();
-                    // console.log("line " + line);
-
                     let divv = $(`#for${selectedTargetIndex} span.ip`).text().replace(/"/g, "'");
-                    console.log(divv);
+                    // console.log(divv);
                     let arr = divv.split(/\'\, /g);
                     // console.log(arr);
-                    let chind = arr.findIndex(item => item.includes(word));
-                    // console.log(chind);
+                    chind = wiValue;
+                    console.log(chind);
                     let tar = JSON.parse(data[selectedTargetIndex]['target'].replace(/'/g, '"'));
                     tar[chind] = label;
                     let resultant = JSON.stringify(tar);
